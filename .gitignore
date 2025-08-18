@@ -4,3 +4,5 @@ __pycache__/
 .Python
 target/
 node_modules/
+Cargo.lock
+*.log
