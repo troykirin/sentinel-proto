@@ -16,7 +16,12 @@ A defensive security tool for analyzing Windows process logs to detect suspiciou
 
 ## Installation
 
-No special installation required. Just ensure Python 3.6+ is installed.
+Requires Python 3.8+ (Python 3.11+ recommended). For Python < 3.11, install the
+`tomli` package:
+
+```bash
+pip install -r python/requirements.txt
+```
 
 ## Usage
 
@@ -33,6 +38,11 @@ python process_analyzer.py <logfile> --output report.txt
 Export to JSON:
 ```bash
 python process_analyzer.py <logfile> --json results.json
+```
+
+Verbose/debug output:
+```bash
+python process_analyzer.py <logfile> -v
 ```
 
 ## Input Format
@@ -56,6 +66,7 @@ The analyzer performs the following security checks:
 ### High Severity
 - Process masquerading (system processes with incorrect signatures)
 - Suspicious process chains (Office → cmd/PowerShell)
+- Suspicious command-line patterns (encoded PowerShell, Squiblydoo, BITS abuse, etc.)
 
 ### Medium Severity
 - Missing company information for system processes

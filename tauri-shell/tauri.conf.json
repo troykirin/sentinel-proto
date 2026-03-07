@@ -1,0 +1,41 @@
+{
+  "package": {
+    "productName": "Sentinel Proto",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "dialog": {
+        "open": true
+      },
+      "fs": {
+        "all": true,
+        "scope": ["**"]
+      }
+    },
+    "windows": [
+      {
+        "title": "Sentinel Proto",
+        "width": 800,
+        "height": 600,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "com.sentinel.proto",
+      "icon": []
+    }
+  },
+  "build": {
+    "distDir": "../ui/dist",
+    "devPath": "../ui/dist",
+    "beforeDevCommand": "",
+    "beforeBuildCommand": ""
+  }
+}

@@ -1,0 +1,4 @@
+# Example configuration file
+[watchlist]
+processes = ['node', 'chrome', 'WindowServer']
+threshold_mb = 4096
