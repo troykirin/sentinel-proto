@@ -1,0 +1,137 @@
+{
+  "version": "1.0",
+  "captured_at": "2026-03-07T10:15:00Z",
+  "source": {
+    "kind": "wsl",
+    "machine": "ryzen-devbox",
+    "environment": "perf-lab",
+    "origin": "sentinel-sample"
+  },
+  "summary": {
+    "total_processes": 148,
+    "total_resident_mb": 18324.5,
+    "watchlist_count": 3,
+    "alert_count": 2,
+    "threshold_mb": 4096
+  },
+  "watchlist": [
+    {
+      "name": "postgres",
+      "pid": 1821,
+      "ppid": 1,
+      "resident_mb": 5128.4,
+      "private_mb": 4980.1,
+      "cpu_pct": 19.2,
+      "status": "critical",
+      "origin": "wsl",
+      "command": "/usr/lib/postgresql/16/bin/postgres -D /var/lib/postgresql/16/main",
+      "tags": ["watchlist", "database"]
+    },
+    {
+      "name": "redis-server",
+      "pid": 2240,
+      "ppid": 1,
+      "resident_mb": 2864.3,
+      "private_mb": 2818.0,
+      "cpu_pct": 7.4,
+      "status": "ok",
+      "origin": "wsl",
+      "command": "redis-server *:6379",
+      "tags": ["watchlist", "cache"]
+    },
+    {
+      "name": "node",
+      "pid": 4412,
+      "ppid": 4380,
+      "resident_mb": 4388.2,
+      "private_mb": 4312.5,
+      "cpu_pct": 26.8,
+      "status": "high",
+      "origin": "wsl",
+      "command": "node ./dist/server.js",
+      "tags": ["watchlist", "api"]
+    }
+  ],
+  "alerts": [
+    {
+      "severity": "critical",
+      "title": "postgres exceeded threshold",
+      "message": "Resident memory is 5128.4 MB, above the 4096 MB watchlist threshold.",
+      "process": "postgres",
+      "pid": 1821
+    },
+    {
+      "severity": "high",
+      "title": "node trending upward",
+      "message": "Node memory climbed by 612 MB during the last perf run.",
+      "process": "node",
+      "pid": 4412
+    }
+  ],
+  "processes": [
+    {
+      "name": "postgres",
+      "pid": 1821,
+      "ppid": 1,
+      "resident_mb": 5128.4,
+      "private_mb": 4980.1,
+      "cpu_pct": 19.2,
+      "status": "critical",
+      "origin": "wsl",
+      "command": "/usr/lib/postgresql/16/bin/postgres -D /var/lib/postgresql/16/main",
+      "tags": ["watchlist", "database"]
+    },
+    {
+      "name": "node",
+      "pid": 4412,
+      "ppid": 4380,
+      "resident_mb": 4388.2,
+      "private_mb": 4312.5,
+      "cpu_pct": 26.8,
+      "status": "high",
+      "origin": "wsl",
+      "command": "node ./dist/server.js",
+      "tags": ["watchlist", "api"]
+    },
+    {
+      "name": "python",
+      "pid": 5016,
+      "ppid": 4988,
+      "resident_mb": 1932.8,
+      "private_mb": 1884.6,
+      "cpu_pct": 11.3,
+      "status": "ok",
+      "origin": "wsl",
+      "command": "python ./scripts/load-test.py",
+      "tags": ["perf-runner"]
+    },
+    {
+      "name": "redis-server",
+      "pid": 2240,
+      "ppid": 1,
+      "resident_mb": 2864.3,
+      "private_mb": 2818.0,
+      "cpu_pct": 7.4,
+      "status": "ok",
+      "origin": "wsl",
+      "command": "redis-server *:6379",
+      "tags": ["watchlist", "cache"]
+    },
+    {
+      "name": "chrome",
+      "pid": 9824,
+      "ppid": 8648,
+      "resident_mb": 1422.1,
+      "private_mb": 1364.8,
+      "cpu_pct": 4.1,
+      "status": "ok",
+      "origin": "windows",
+      "command": "chrome.exe --profile-directory=Default",
+      "tags": ["browser"]
+    }
+  ],
+  "notes": [
+    "This is a sample payload for the desktop vessel UI.",
+    "Your WSL-side collectors can add more fields without breaking the current UI."
+  ]
+}

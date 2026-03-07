@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://troykirin.github.io/sentinel-proto/contracts/memory_snapshot.schema.json",
+  "title": "Sentinel Memory Snapshot",
+  "description": "Contract for surfacing WSL or Windows memory/process state into the Sentinel desktop vessel UI.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["version", "captured_at", "summary", "processes"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Contract version for the payload."
+    },
+    "captured_at": {
+      "type": "string",
+      "description": "Snapshot timestamp in ISO 8601 format."
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "summary": {
+      "$ref": "#/$defs/summary"
+    },
+    "watchlist": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/process"
+      }
+    },
+    "alerts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/alert"
+      }
+    },
+    "processes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/process"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "kind": { "type": "string" },
+        "machine": { "type": "string" },
+        "environment": { "type": "string" },
+        "origin": { "type": "string" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["total_processes", "total_resident_mb"],
+      "properties": {
+        "total_processes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_resident_mb": {
+          "type": "number",
+          "minimum": 0
+        },
+        "watchlist_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "alert_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "threshold_mb": {
+          "type": ["number", "null"],
+          "minimum": 0
+        }
+      }
+    },
+    "process": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["name", "resident_mb"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "pid": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "ppid": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "resident_mb": {
+          "type": "number",
+          "minimum": 0
+        },
+        "private_mb": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "cpu_pct": {
+          "type": ["number", "null"]
+        },
+        "status": {
+          "type": "string"
+        },
+        "origin": {
+          "type": "string"
+        },
+        "command": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "alert": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["severity", "title", "message"],
+      "properties": {
+        "severity": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "process": {
+          "type": "string"
+        },
+        "pid": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

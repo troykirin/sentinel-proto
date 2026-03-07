@@ -1,114 +1,108 @@
-# Windows Process Security Analyzer
+# Sentinel Proto
 
-A defensive security tool for analyzing Windows process logs to detect suspicious behavior, malicious processes, and potential security threats.
+Sentinel Proto is a thin desktop vessel for process and memory data.
 
-## Features
+The through line is simple:
+- Collectors in WSL or Windows own the hard part.
+- This app renders a stable JSON snapshot contract in a lightweight desktop UI.
+- The old process-log analyzer still exists as a compatibility path for earlier experiments.
 
-- **Process Tree Analysis**: Builds parent-child relationships from process logs
-- **Security Detection**: Identifies suspicious processes and behaviors including:
-  - Known malicious/hacking tools
-  - Process masquerading (legitimate processes with wrong signatures)
-  - Suspicious process chains (e.g., Office apps spawning cmd/PowerShell)
-  - High CPU/memory usage anomalies
-  - Unsigned processes
-- **Comprehensive Reporting**: Generates detailed security reports with severity levels
-- **JSON Export**: Export analysis results for further processing
+## What It Is Now
 
-## Installation
+There are two modes in this repo:
 
-Requires Python 3.8+ (Python 3.11+ recommended). For Python < 3.11, install the
-`tomli` package:
+1. Snapshot vessel mode
+   The preferred path. A producer emits a JSON snapshot, and the Tauri UI renders memory, watchlist, alerts, and top process rows.
+
+2. Legacy analyzer mode
+   The original proof-of-concept path. `process_analyzer.py` parses tab-separated Windows process logs and produces a text report with security and resource findings.
+
+The snapshot contract is documented in `contracts/memory_snapshot.schema.json`, `contracts/memory_snapshot.example.json`, and `contracts/README.md`.
+
+## Run The Desktop UI
+
+From the repo root:
 
 ```bash
-pip install -r python/requirements.txt
+cd tauri-shell
+cargo run
 ```
 
-## Usage
+The UI will:
+- reload the last snapshot JSON you selected, if one is remembered
+- otherwise load the bundled example snapshot
+- keep the legacy log analysis buttons available for older workflows
+
+## Snapshot Contract
+
+Top-level payload shape:
+
+```json
+{
+  "version": "1.0",
+  "captured_at": "2026-03-07T10:15:00Z",
+  "source": {},
+  "summary": {
+    "total_processes": 148,
+    "total_resident_mb": 18324.5
+  },
+  "watchlist": [],
+  "alerts": [],
+  "processes": [],
+  "notes": []
+}
+```
+
+Design rules:
+- Keep the contract small and boring.
+- Unknown fields are allowed and ignored by the current UI.
+- Producers should treat this as a snapshot, not a streaming protocol.
+- If optional counts are omitted, the desktop bridge backfills them from the arrays when possible.
+
+See `contracts/README.md` for field guidance.
+
+## Legacy Analyzer
 
 Basic usage:
+
 ```bash
 python process_analyzer.py <logfile>
 ```
 
 Save report to file:
+
 ```bash
 python process_analyzer.py <logfile> --output report.txt
 ```
 
-Export to JSON:
+Export JSON:
+
 ```bash
 python process_analyzer.py <logfile> --json results.json
 ```
 
-Verbose/debug output:
+Verbose output:
+
 ```bash
 python process_analyzer.py <logfile> -v
 ```
 
-## Input Format
+The analyzer still checks for:
+- suspicious process chains
+- masquerading or missing company info
+- high CPU and high memory usage
+- unsigned or high-risk processes
+- configured watchlist process memory thresholds
 
-The analyzer expects process logs in tab-separated format with the following columns:
-- Process name (with indentation showing hierarchy)
-- CPU usage
-- Private Bytes
-- Working Set
-- PID
-- Description
-- Company Name
+Watchlist configuration lives in `config/sentinel_config.toml`.
 
-## Security Checks
+## Current Direction
 
-The analyzer performs the following security checks:
+If you already have richer WSL-side tooling, keep that logic there.
 
-### Critical Severity
-- Known malicious tools (mimikatz, psexec, cryptolocker, etc.)
+The lowest-friction integration is:
+- have your WSL tooling emit a JSON file that matches the snapshot contract
+- load that file once in the desktop app
+- use `Reload Last Snapshot` as you iterate, or point future tooling at the same file path
 
-### High Severity
-- Process masquerading (system processes with incorrect signatures)
-- Suspicious process chains (Office → cmd/PowerShell)
-- Suspicious command-line patterns (encoded PowerShell, Squiblydoo, BITS abuse, etc.)
-
-### Medium Severity
-- Missing company information for system processes
-- Extremely high CPU usage (>90%)
-
-### Low Severity
-- Unsigned processes
-- High memory usage (>1GB)
-
-## Example Output
-
-```
-================================================================================
-WINDOWS PROCESS SECURITY ANALYSIS REPORT
-================================================================================
-
-SUMMARY STATISTICS
-----------------------------------------
-Total processes analyzed: 500
-Suspicious findings: 25
-
-Findings by severity:
-  CRITICAL: 0
-  HIGH: 2
-  MEDIUM: 5
-  LOW: 18
-
-[HIGH] Findings:
-  • Process Masquerading: svchost.exe
-    Process svchost.exe has unexpected company: Unknown (expected: Microsoft Corporation)
-    PID: 12345
-```
-
-## Security Best Practices
-
-When reviewing the analysis results:
-
-1. **Investigate Critical findings immediately** - These indicate known malicious tools
-2. **Verify High severity findings** - Check if processes are legitimate or compromised
-3. **Review Medium findings** - May indicate configuration issues or suspicious activity
-4. **Monitor Low severity findings** - Track patterns over time
-
-## License
-
-This tool is for defensive security purposes only. Use responsibly for analyzing and securing Windows systems.
+That keeps Sentinel Proto as a vessel UI instead of turning it into another collector.

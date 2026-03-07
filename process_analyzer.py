@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Windows Process Security Analyzer
-Defensive security tool for analyzing Windows process logs to detect suspicious behavior
+Windows Process Analyzer
+Defensive tool for analyzing Windows process logs for security signals and resource anomalies.
 """
 
 import re
@@ -13,6 +13,8 @@ from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass, field
 from collections import defaultdict
 import argparse
+
+from python.config_loader import DEFAULT_CONFIG_PATH, load_config
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +103,52 @@ class ProcessAnalyzer:
         self.processes: List[Process] = []
         self.process_tree: Dict[int, Process] = {}
         self.suspicious_findings: List[Dict] = []
+        self.watchlist_processes: set[str] = set()
+        self.watchlist_threshold_bytes: Optional[int] = None
+        self.watchlist_matches: List[Dict] = []
+        self.watchlist_config_path: Optional[Path] = None
+
+    @staticmethod
+    def _normalize_process_name(name: str) -> str:
+        """Normalize process names so config entries can omit .exe."""
+        normalized = name.strip().lower()
+        return normalized[:-4] if normalized.endswith('.exe') else normalized
+
+    def load_watchlist_config(self, path: Path = DEFAULT_CONFIG_PATH) -> None:
+        """Load optional watchlist config used for perf-oriented findings."""
+        self.watchlist_processes = set()
+        self.watchlist_threshold_bytes = None
+        self.watchlist_config_path = None
+
+        try:
+            config = load_config(path)
+        except FileNotFoundError:
+            logger.info("Watchlist config not found, skipping: %s", path)
+            return
+        except Exception as e:
+            logger.warning("Failed to load watchlist config %s: %s", path, e)
+            return
+
+        watchlist = config.get('watchlist', {})
+        processes = watchlist.get('processes', [])
+        if isinstance(processes, list):
+            self.watchlist_processes = {
+                self._normalize_process_name(str(process_name))
+                for process_name in processes
+                if str(process_name).strip()
+            }
+
+        threshold_mb = watchlist.get('threshold_mb')
+        if isinstance(threshold_mb, (int, float)) and threshold_mb > 0:
+            self.watchlist_threshold_bytes = int(float(threshold_mb) * 1024 * 1024)
+
+        if self.watchlist_processes:
+            self.watchlist_config_path = path
+            logger.info(
+                "Loaded watchlist config with %d process names from %s",
+                len(self.watchlist_processes),
+                path,
+            )
 
     # ------------------------------------------------------------------
     # Parsing
@@ -231,9 +279,14 @@ class ProcessAnalyzer:
     def analyze_security(self) -> None:
         """Perform security analysis on all parsed processes."""
         self.suspicious_findings = []
+        self.watchlist_matches = []
 
         for process in self.processes:
             name_lower = process.name.lower()
+            normalized_name = self._normalize_process_name(process.name)
+
+            if normalized_name in self.watchlist_processes:
+                self._track_watchlist_process(process)
 
             # CRITICAL: Known malicious tools
             if name_lower in self.HIGH_RISK_PROCESSES:
@@ -275,6 +328,35 @@ class ProcessAnalyzer:
                     and name_lower not in self.LEGITIMATE_PROCESSES):
                 self._add_finding('LOW', 'Unsigned Process', process,
                                   f'Process {process.name} has no company signature')
+
+    def _track_watchlist_process(self, process: Process) -> None:
+        """Record watchlist processes and flag memory threshold exceedances."""
+        working_set = process.working_set or 0
+        private_bytes = process.private_bytes or 0
+        exceeded = (
+            self.watchlist_threshold_bytes is not None
+            and working_set > self.watchlist_threshold_bytes
+        )
+
+        self.watchlist_matches.append({
+            'process': process.name,
+            'pid': process.pid,
+            'cpu': process.cpu,
+            'working_set_bytes': working_set,
+            'private_bytes': private_bytes,
+            'exceeded': exceeded,
+        })
+
+        if exceeded and self.watchlist_threshold_bytes is not None:
+            threshold_mb = self.watchlist_threshold_bytes / (1024 * 1024)
+            working_set_mb = working_set / (1024 * 1024)
+            self._add_finding(
+                'MEDIUM',
+                'Watchlist Memory Threshold',
+                process,
+                f'Watched process {process.name} is using {working_set_mb:.1f} MB '
+                f'working set (threshold: {threshold_mb:.1f} MB)',
+            )
 
     def check_process_chains(self) -> None:
         """Check for suspicious process spawning chains."""
@@ -321,10 +403,10 @@ class ProcessAnalyzer:
     # ------------------------------------------------------------------
 
     def generate_report(self) -> str:
-        """Generate security analysis report."""
+        """Generate process analysis report."""
         report: List[str] = []
         report.append("=" * 80)
-        report.append("WINDOWS PROCESS SECURITY ANALYSIS REPORT")
+        report.append("WINDOWS PROCESS ANALYSIS REPORT")
         report.append("=" * 80)
         report.append("")
 
@@ -369,10 +451,44 @@ class ProcessAnalyzer:
             mem_mb = (proc.working_set or 0) / (1024 * 1024)
             report.append(f"  {proc.name}: {mem_mb:.1f} MB (PID: {proc.pid})")
 
+        if self.watchlist_processes:
+            report.append("")
+            report.append("WATCHLIST STATUS")
+            report.append("-" * 40)
+            report.append(
+                "Configured processes: "
+                + ', '.join(sorted(self.watchlist_processes))
+            )
+            if self.watchlist_threshold_bytes is not None:
+                threshold_mb = self.watchlist_threshold_bytes / (1024 * 1024)
+                report.append(f"Configured memory threshold: {threshold_mb:.1f} MB")
+            if self.watchlist_config_path:
+                report.append(f"Config path: {self.watchlist_config_path}")
+
+            if self.watchlist_matches:
+                for match in sorted(
+                    self.watchlist_matches,
+                    key=lambda item: item['working_set_bytes'],
+                    reverse=True,
+                ):
+                    working_set_mb = match['working_set_bytes'] / (1024 * 1024)
+                    private_mb = match['private_bytes'] / (1024 * 1024)
+                    line = (
+                        f"  {match['process']}: {working_set_mb:.1f} MB working set / "
+                        f"{private_mb:.1f} MB private"
+                    )
+                    if match['pid']:
+                        line += f" (PID: {match['pid']})"
+                    if match['exceeded']:
+                        line += " [THRESHOLD EXCEEDED]"
+                    report.append(line)
+            else:
+                report.append("No configured watchlist processes were found.")
+
         # Suspicious findings
         if self.suspicious_findings:
             report.append("")
-            report.append("SECURITY FINDINGS")
+            report.append("ANALYSIS FINDINGS")
             report.append("-" * 40)
 
             findings_by_severity: Dict[str, List[Dict]] = defaultdict(list)
@@ -439,6 +555,12 @@ class ProcessAnalyzer:
                 'suspicious_findings': len(self.suspicious_findings),
             },
             'findings': self.suspicious_findings,
+            'watchlist': {
+                'configured_processes': sorted(self.watchlist_processes),
+                'threshold_mb': round(self.watchlist_threshold_bytes / (1024 * 1024), 2)
+                                if self.watchlist_threshold_bytes else None,
+                'matches': self.watchlist_matches,
+            },
             'processes': [
                 {
                     'name': p.name,
@@ -468,7 +590,7 @@ class ProcessAnalyzer:
 def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description='Analyze Windows process logs for security threats',
+        description='Analyze Windows process logs for security and resource anomalies',
     )
     parser.add_argument('logfile', type=Path, help='Path to process log file')
     parser.add_argument('--json', type=Path, dest='json_out',
@@ -490,6 +612,7 @@ def main() -> int:
 
     # Create analyzer and process log
     analyzer = ProcessAnalyzer()
+    analyzer.load_watchlist_config()
 
     logger.info("Parsing process log: %s", args.logfile)
     analyzer.parse_process_log(args.logfile)

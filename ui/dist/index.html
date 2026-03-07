@@ -2,124 +2,369 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="data:,">
     <title>Sentinel Proto</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        :root {
+            --bg-start: #5f72d8;
+            --bg-end: #7d58b3;
+            --panel: #f5f4f7;
+            --card: #ffffff;
+            --ink: #2b2f38;
+            --muted: #637085;
+            --line: #ddd9e3;
+            --accent: #2268ff;
+            --accent-dark: #184fc4;
+            --success-bg: #e2f3e8;
+            --success-ink: #1c6d3a;
+            --warning-bg: #fff2d9;
+            --warning-ink: #8f5d00;
+            --error-bg: #f8dfe2;
+            --error-ink: #8f2234;
+            --critical-bg: #3d1f28;
+            --critical-ink: #ffd9df;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
             min-height: 100vh;
+            color: var(--ink);
         }
-        .container { 
-            background: white; 
-            padding: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1); 
-            max-width: 1000px;
+
+        .container {
+            background: var(--panel);
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 12px 40px rgba(25, 25, 45, 0.18);
+            max-width: 1180px;
             margin: 0 auto;
         }
+
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
             padding-bottom: 20px;
-            border-bottom: 2px solid #eee;
+            border-bottom: 2px solid var(--line);
         }
-        h1 { 
-            color: #333; 
+
+        h1 {
+            color: var(--ink);
             margin: 0 0 10px 0;
             font-size: 2.5em;
         }
+
         .subtitle {
-            color: #666;
+            color: var(--muted);
             font-size: 1.1em;
             margin: 0;
         }
-        .controls {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            align-items: center;
-            flex-wrap: wrap;
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
         }
-        button { 
-            background: #007bff; 
-            color: white; 
-            border: none; 
-            padding: 12px 24px; 
-            border-radius: 6px; 
-            cursor: pointer; 
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 13px 18px;
+            border-radius: 10px;
+            cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-weight: 600;
+            transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            min-height: 48px;
         }
-        button:hover { 
-            background: #0056b3; 
+
+        button:hover {
+            background: var(--accent-dark);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+            box-shadow: 0 6px 18px rgba(34, 104, 255, 0.25);
         }
+
+        button.secondary {
+            background: #515a70;
+        }
+
+        button.secondary:hover {
+            background: #3f4758;
+            box-shadow: 0 6px 18px rgba(63, 71, 88, 0.25);
+        }
+
+        button.ghost {
+            background: #c6c3cd;
+            color: #ffffff;
+        }
+
+        button.ghost:hover {
+            background: #b2aeb9;
+            box-shadow: none;
+        }
+
         button:disabled {
-            background: #ccc;
+            background: #cbc8d2;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
+
+        .file-info,
+        .status,
+        .section {
+            border-radius: 12px;
+        }
+
         .file-info {
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            border-left: 4px solid #007bff;
-            margin-bottom: 15px;
-            font-family: monospace;
-            font-size: 14px;
+            padding: 12px 14px;
+            background: #eceaf1;
+            border-left: 4px solid var(--accent);
+            margin-bottom: 12px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 13px;
+            color: #435066;
         }
+
         .status {
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            font-weight: 600;
         }
+
         .status.loading {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            color: #856404;
+            background: var(--warning-bg);
+            color: var(--warning-ink);
         }
+
         .status.success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
+            background: var(--success-bg);
+            color: var(--success-ink);
         }
+
         .status.error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
+            background: var(--error-bg);
+            color: var(--error-ink);
         }
+
+        .hidden {
+            display: none;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .summary-card {
+            background: var(--card);
+            border: 1px solid #ece7f2;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 6px 18px rgba(36, 37, 53, 0.06);
+        }
+
+        .summary-label {
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .summary-value {
+            font-size: 1.55em;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .summary-subvalue {
+            margin-top: 6px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .section {
+            background: var(--card);
+            border: 1px solid #ece7f2;
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 18px rgba(36, 37, 53, 0.06);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.1em;
+            color: var(--ink);
+        }
+
+        .section-meta {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--muted);
+        }
+
+        .alert-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .alert-item {
+            border-radius: 12px;
+            padding: 14px;
+            border: 1px solid transparent;
+        }
+
+        .alert-item.critical {
+            background: var(--critical-bg);
+            color: var(--critical-ink);
+        }
+
+        .alert-item.high {
+            background: #fff0dd;
+            color: #8c4a00;
+            border-color: #f3d0a8;
+        }
+
+        .alert-item.medium {
+            background: #fff8df;
+            color: #846000;
+            border-color: #edd98a;
+        }
+
+        .alert-item.low {
+            background: #edf3ff;
+            color: #2a4d8f;
+            border-color: #c9daf9;
+        }
+
+        .alert-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .alert-meta {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
+
+        .empty-state {
+            color: var(--muted);
+            font-size: 14px;
+            padding: 8px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #ece7f2;
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        th {
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .mono {
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 12px;
+            color: #55627a;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .pill.critical {
+            background: #4c2631;
+            color: #ffe4ea;
+        }
+
+        .pill.high {
+            background: #ffe4c7;
+            color: #a15300;
+        }
+
+        .pill.medium {
+            background: #fff3bf;
+            color: #866400;
+        }
+
+        .pill.low,
+        .pill.ok {
+            background: #e2eefc;
+            color: #2d5c9b;
+        }
+
         .report-container {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            max-height: 500px;
+            background: #f8f9fb;
+            border: 1px solid #e9e5ee;
+            border-radius: 10px;
+            max-height: 420px;
             overflow-y: auto;
         }
+
         .report-content {
             padding: 15px;
-            font-family: 'Courier New', monospace;
+            font-family: Consolas, "Courier New", monospace;
             font-size: 13px;
-            line-height: 1.4;
+            line-height: 1.45;
             white-space: pre-wrap;
             color: #333;
         }
-        .hidden { display: none; }
+
         .spinner {
             display: inline-block;
             width: 16px;
             height: 16px;
-            border: 2px solid #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.7);
             border-radius: 50%;
             border-top-color: transparent;
             animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
         }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -129,113 +374,228 @@
     <div class="container">
         <div class="header">
             <h1>Sentinel Proto</h1>
-            <p class="subtitle">Windows Process Security Analyzer</p>
+            <p class="subtitle">Memory snapshot vessel for WSL and Windows process data</p>
         </div>
 
-        <div class="controls">
-            <button onclick="selectFile()" id="selectBtn" disabled>
-                Select Process Log
-            </button>
-            <button onclick="analyzeFile()" id="analyzeBtn" disabled>
-                Analyze Processes
-            </button>
-            <button onclick="greet()" id="testBtn" disabled>
-                Test Connection
-            </button>
+        <div class="toolbar">
+            <button onclick="loadExampleSnapshot()" id="exampleBtn" disabled>Load Example Snapshot</button>
+            <button onclick="selectSnapshotFile()" id="snapshotBtn" disabled>Load Snapshot JSON</button>
+            <button class="secondary" onclick="reloadLastSnapshot()" id="reloadSnapshotBtn" disabled>Reload Last Snapshot</button>
+            <button class="secondary" onclick="selectLogFile()" id="selectLogBtn" disabled>Select Process Log</button>
+            <button class="ghost" onclick="analyzeSelectedLog()" id="analyzeLogBtn" disabled>Analyze Selected Log</button>
         </div>
 
-        <div id="selectedFile" class="file-info hidden">
-            <strong>Selected file:</strong> <span id="fileName"></span>
+        <div id="selectedSnapshot" class="file-info hidden">
+            <strong>Snapshot source:</strong> <span id="snapshotPath"></span>
+        </div>
+
+        <div id="selectedLog" class="file-info hidden">
+            <strong>Legacy log source:</strong> <span id="logPath"></span>
         </div>
 
         <div id="status" class="hidden"></div>
 
-        <div id="reportContainer" class="report-container hidden">
-            <div id="report" class="report-content"></div>
+        <div id="snapshotView" class="hidden">
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-label">Captured At</div>
+                    <div id="capturedAt" class="summary-value">-</div>
+                    <div id="sourceLabel" class="summary-subvalue">-</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Total Processes</div>
+                    <div id="totalProcesses" class="summary-value">0</div>
+                    <div class="summary-subvalue">Processes surfaced by the payload</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Resident Memory</div>
+                    <div id="totalResident" class="summary-value">0 MB</div>
+                    <div id="thresholdValue" class="summary-subvalue">Threshold: -</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Watchlist</div>
+                    <div id="watchlistCount" class="summary-value">0</div>
+                    <div class="summary-subvalue">Configured watchlist entries in this payload</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Alerts</div>
+                    <div id="alertCount" class="summary-value">0</div>
+                    <div class="summary-subvalue">Current alert objects surfaced by the payload</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2>Alerts</h2>
+                    <div class="section-meta" id="alertMeta">Waiting for snapshot data</div>
+                </div>
+                <div id="alertsEmpty" class="empty-state">Load a snapshot to see current alerts.</div>
+                <div id="alertsList" class="alert-list hidden"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2>Watchlist</h2>
+                    <div class="section-meta">Processes your collectors care about most</div>
+                </div>
+                <div id="watchlistEmpty" class="empty-state">No watchlist processes are present in this snapshot.</div>
+                <table id="watchlistTable" class="hidden">
+                    <thead>
+                        <tr>
+                            <th>Process</th>
+                            <th>Status</th>
+                            <th>Resident</th>
+                            <th>CPU</th>
+                            <th>Origin</th>
+                            <th>Command</th>
+                        </tr>
+                    </thead>
+                    <tbody id="watchlistBody"></tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2>Top Memory Processes</h2>
+                    <div class="section-meta" id="processMeta">Sorted by resident memory</div>
+                </div>
+                <div id="processEmpty" class="empty-state">No process data loaded yet.</div>
+                <table id="processTable" class="hidden">
+                    <thead>
+                        <tr>
+                            <th>Process</th>
+                            <th>Resident</th>
+                            <th>Private</th>
+                            <th>CPU</th>
+                            <th>Origin</th>
+                            <th>Tags</th>
+                        </tr>
+                    </thead>
+                    <tbody id="processBody"></tbody>
+                </table>
+            </div>
+
+            <div id="notesSection" class="section hidden">
+                <div class="section-header">
+                    <h2>Notes</h2>
+                    <div class="section-meta">Free-form context supplied by the producer</div>
+                </div>
+                <ul id="notesList" class="note-list"></ul>
+            </div>
+        </div>
+
+        <div id="reportSection" class="section hidden">
+            <div class="section-header">
+                <h2>Legacy Log Report</h2>
+                <div class="section-meta">Existing analyzer path kept for compatibility</div>
+            </div>
+            <div class="report-container">
+                <div id="report" class="report-content"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        let selectedFilePath = null;
+        const MAX_ROWS = 18;
+        const LAST_SNAPSHOT_KEY = "sentinel:lastSnapshotPath";
+        let selectedLogPath = null;
         let invoke;
 
-        // Wait for Tauri API to be available
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Wait for Tauri to be loaded
+        document.addEventListener("DOMContentLoaded", async () => {
             while (!window.__TAURI__) {
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
+
             invoke = window.__TAURI__.tauri.invoke;
-            
-            // Update button states
-            document.getElementById("selectBtn").disabled = false;
-            document.getElementById("testBtn").disabled = false;
+
+            document.getElementById("exampleBtn").disabled = false;
+            document.getElementById("snapshotBtn").disabled = false;
+            document.getElementById("reloadSnapshotBtn").disabled = false;
+            document.getElementById("selectLogBtn").disabled = false;
+            syncReloadButton();
+
+            const rememberedSnapshotPath = getRememberedSnapshotPath();
+            if (rememberedSnapshotPath) {
+                try {
+                    await loadSnapshotPath(rememberedSnapshotPath, {
+                        label: rememberedSnapshotPath,
+                        loadingMessage: "Reloading the last snapshot...",
+                        successMessage: "Last snapshot reloaded.",
+                    });
+                } catch (error) {
+                    showStatus("Could not reload the last snapshot. Showing the bundled example instead.", "error");
+                    await loadExampleSnapshot({ startup: true });
+                }
+            } else {
+                await loadExampleSnapshot({ startup: true });
+            }
         });
 
-        async function selectFile() {
-            if (!invoke) {
-                showStatus("Tauri API not ready yet, please wait...", "error");
-                return;
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll("\"", "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+        function formatMb(value) {
+            if (value === null || value === undefined || Number.isNaN(Number(value))) {
+                return "—";
             }
-            
+            return `${Number(value).toFixed(1)} MB`;
+        }
+
+        function formatCpu(value) {
+            if (value === null || value === undefined || Number.isNaN(Number(value))) {
+                return "—";
+            }
+            return `${Number(value).toFixed(1)}%`;
+        }
+
+        function formatInteger(value) {
+            if (value === null || value === undefined || Number.isNaN(Number(value))) {
+                return "0";
+            }
+            return Number(value).toLocaleString();
+        }
+
+        function statusClass(value) {
+            const normalized = String(value || "ok").toLowerCase();
+            if (normalized === "critical") return "critical";
+            if (normalized === "high") return "high";
+            if (normalized === "medium" || normalized === "warning") return "medium";
+            return "ok";
+        }
+
+        function setBusy(buttonId, idleText, busyText, isBusy) {
+            const button = document.getElementById(buttonId);
+            button.disabled = isBusy;
+            button.innerHTML = isBusy ? `<span class="spinner"></span>${busyText}` : idleText;
+        }
+
+        function getRememberedSnapshotPath() {
             try {
-                const filePath = await invoke("select_file");
-                if (filePath) {
-                    selectedFilePath = filePath;
-                    document.getElementById("fileName").textContent = filePath;
-                    document.getElementById("selectedFile").classList.remove("hidden");
-                    document.getElementById("analyzeBtn").disabled = false;
-                }
-            } catch (error) {
-                showStatus("Failed to select file: " + error, "error");
+                return window.localStorage.getItem(LAST_SNAPSHOT_KEY);
+            } catch {
+                return null;
             }
         }
 
-        async function analyzeFile() {
-            if (!invoke) {
-                showStatus("Tauri API not ready yet, please wait...", "error");
-                return;
-            }
-            
-            if (!selectedFilePath) {
-                showStatus("Please select a log file first", "error");
-                return;
-            }
-
-            showStatus("Analyzing processes...", "loading");
-            document.getElementById("analyzeBtn").disabled = true;
-            document.getElementById("analyzeBtn").innerHTML = '<span class="spinner"></span> Analyzing...';
-
+        function rememberSnapshotPath(snapshotPath) {
             try {
-                const result = await invoke("analyze_process_log", { logPath: selectedFilePath });
-                
-                if (result.success && result.report) {
-                    showStatus("Analysis completed successfully!", "success");
-                    document.getElementById("report").textContent = result.report;
-                    document.getElementById("reportContainer").classList.remove("hidden");
-                } else {
-                    showStatus("Analysis failed: " + (result.error || "Unknown error"), "error");
-                }
-            } catch (error) {
-                showStatus("Failed to analyze file: " + error, "error");
-            } finally {
-                document.getElementById("analyzeBtn").disabled = false;
-                document.getElementById("analyzeBtn").innerHTML = 'Analyze Processes';
+                window.localStorage.setItem(LAST_SNAPSHOT_KEY, snapshotPath);
+            } catch {
+                // Ignore storage failures and keep the current session usable.
             }
+
+            syncReloadButton();
         }
 
-        async function greet() {
-            if (!invoke) {
-                showStatus("Tauri API not ready yet, please wait...", "error");
-                return;
-            }
-            
-            try {
-                const result = await invoke("greet", { name: "Sentinel" });
-                showStatus("Connection test successful: " + result, "success");
-            } catch (error) {
-                showStatus("Connection test failed: " + error, "error");
-            }
+        function syncReloadButton() {
+            const reloadButton = document.getElementById("reloadSnapshotBtn");
+            reloadButton.disabled = !invoke || !getRememberedSnapshotPath();
         }
 
         function showStatus(message, type) {
@@ -244,12 +604,304 @@
             statusEl.className = `status ${type}`;
             statusEl.classList.remove("hidden");
 
-            if (type === "success" || type === "error") {
-                setTimeout(() => {
-                    if (type === "success") {
-                        statusEl.classList.add("hidden");
-                    }
-                }, 3000);
+            if (type === "success") {
+                setTimeout(() => statusEl.classList.add("hidden"), 2500);
+            }
+        }
+
+        function clearLegacyReport() {
+            document.getElementById("reportSection").classList.add("hidden");
+            document.getElementById("report").textContent = "";
+        }
+
+        async function loadSnapshotPath(snapshotPath, options = {}) {
+            const {
+                label = snapshotPath,
+                loadingMessage = "Loading memory snapshot...",
+                successMessage = "Snapshot loaded successfully.",
+            } = options;
+
+            showStatus(loadingMessage, "loading");
+            const snapshot = await invoke("load_memory_snapshot", { snapshotPath });
+            renderSnapshot(snapshot, label);
+            rememberSnapshotPath(snapshotPath);
+            showStatus(successMessage, "success");
+            return snapshot;
+        }
+
+        function renderSnapshot(snapshot, label) {
+            clearLegacyReport();
+            document.getElementById("snapshotView").classList.remove("hidden");
+            document.getElementById("selectedSnapshot").classList.remove("hidden");
+            document.getElementById("snapshotPath").textContent = label;
+
+            const sourceBits = [
+                snapshot.source.kind,
+                snapshot.source.machine,
+                snapshot.source.environment,
+                snapshot.source.origin,
+            ].filter(Boolean);
+
+            document.getElementById("capturedAt").textContent = snapshot.captured_at || "Unknown";
+            document.getElementById("sourceLabel").textContent = sourceBits.join(" / ") || "Unspecified source";
+            document.getElementById("totalProcesses").textContent = formatInteger(snapshot.summary.total_processes);
+            document.getElementById("totalResident").textContent = formatMb(snapshot.summary.total_resident_mb);
+            document.getElementById("thresholdValue").textContent =
+                snapshot.summary.threshold_mb === null || snapshot.summary.threshold_mb === undefined
+                    ? "Threshold: none"
+                    : `Threshold: ${formatMb(snapshot.summary.threshold_mb)}`;
+            document.getElementById("watchlistCount").textContent = formatInteger(snapshot.summary.watchlist_count);
+            document.getElementById("alertCount").textContent = formatInteger(snapshot.summary.alert_count);
+
+            renderAlerts(snapshot.alerts || []);
+            renderWatchlist(snapshot.watchlist || []);
+            renderProcesses(snapshot.processes || []);
+            renderNotes(snapshot.notes || []);
+        }
+
+        function renderAlerts(alerts) {
+            const list = document.getElementById("alertsList");
+            const empty = document.getElementById("alertsEmpty");
+            const meta = document.getElementById("alertMeta");
+
+            if (!alerts.length) {
+                list.classList.add("hidden");
+                list.innerHTML = "";
+                empty.classList.remove("hidden");
+                meta.textContent = "No active alert objects were provided";
+                return;
+            }
+
+            empty.classList.add("hidden");
+            list.classList.remove("hidden");
+            meta.textContent = `${alerts.length} alert${alerts.length === 1 ? "" : "s"} in the payload`;
+            list.innerHTML = alerts.map(alert => {
+                const severity = statusClass(alert.severity);
+                const metaBits = [alert.process, alert.pid ? `PID ${alert.pid}` : ""].filter(Boolean);
+                return `
+                    <div class="alert-item ${severity}">
+                        <div class="alert-title">${escapeHtml(alert.title || "Untitled alert")}</div>
+                        <div>${escapeHtml(alert.message || "")}</div>
+                        <div class="alert-meta">${escapeHtml(metaBits.join(" / ") || String(alert.severity || "").toUpperCase())}</div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function renderWatchlist(processes) {
+            const table = document.getElementById("watchlistTable");
+            const body = document.getElementById("watchlistBody");
+            const empty = document.getElementById("watchlistEmpty");
+
+            if (!processes.length) {
+                table.classList.add("hidden");
+                body.innerHTML = "";
+                empty.classList.remove("hidden");
+                return;
+            }
+
+            empty.classList.add("hidden");
+            table.classList.remove("hidden");
+            body.innerHTML = processes
+                .slice()
+                .sort((a, b) => Number(b.resident_mb || 0) - Number(a.resident_mb || 0))
+                .map(process => `
+                    <tr>
+                        <td>
+                            <div>${escapeHtml(process.name || "unknown")}</div>
+                            <div class="mono">${escapeHtml(process.pid ? `PID ${process.pid}` : "No PID")}</div>
+                        </td>
+                        <td><span class="pill ${statusClass(process.status)}">${escapeHtml(process.status || "ok")}</span></td>
+                        <td>${formatMb(process.resident_mb)}</td>
+                        <td>${formatCpu(process.cpu_pct)}</td>
+                        <td>${escapeHtml(process.origin || "unspecified")}</td>
+                        <td class="mono">${escapeHtml(process.command || "")}</td>
+                    </tr>
+                `)
+                .join("");
+        }
+
+        function renderProcesses(processes) {
+            const table = document.getElementById("processTable");
+            const body = document.getElementById("processBody");
+            const empty = document.getElementById("processEmpty");
+            const meta = document.getElementById("processMeta");
+
+            if (!processes.length) {
+                table.classList.add("hidden");
+                body.innerHTML = "";
+                empty.classList.remove("hidden");
+                meta.textContent = "No process data supplied";
+                return;
+            }
+
+            const sorted = processes
+                .slice()
+                .sort((a, b) => Number(b.resident_mb || 0) - Number(a.resident_mb || 0))
+                .slice(0, MAX_ROWS);
+
+            empty.classList.add("hidden");
+            table.classList.remove("hidden");
+            meta.textContent = `Showing top ${sorted.length} process entries by resident memory`;
+
+            body.innerHTML = sorted.map(process => `
+                <tr>
+                    <td>
+                        <div>${escapeHtml(process.name || "unknown")}</div>
+                        <div class="mono">${escapeHtml(process.command || "")}</div>
+                    </td>
+                    <td>${formatMb(process.resident_mb)}</td>
+                    <td>${formatMb(process.private_mb)}</td>
+                    <td>${formatCpu(process.cpu_pct)}</td>
+                    <td>${escapeHtml(process.origin || "unspecified")}</td>
+                    <td>${escapeHtml((process.tags || []).join(", ") || "—")}</td>
+                </tr>
+            `).join("");
+        }
+
+        function renderNotes(notes) {
+            const section = document.getElementById("notesSection");
+            const list = document.getElementById("notesList");
+
+            if (!notes.length) {
+                section.classList.add("hidden");
+                list.innerHTML = "";
+                return;
+            }
+
+            section.classList.remove("hidden");
+            list.innerHTML = notes.map(note => `<li>${escapeHtml(note)}</li>`).join("");
+        }
+
+        async function reloadLastSnapshot() {
+            if (!invoke) {
+                showStatus("Tauri bridge is not ready yet.", "error");
+                return;
+            }
+
+            const snapshotPath = getRememberedSnapshotPath();
+            if (!snapshotPath) {
+                showStatus("Load a snapshot JSON file first.", "error");
+                return;
+            }
+
+            try {
+                setBusy("reloadSnapshotBtn", "Reload Last Snapshot", "Reloading snapshot...", true);
+                await loadSnapshotPath(snapshotPath, {
+                    label: snapshotPath,
+                    loadingMessage: "Reloading the last snapshot...",
+                    successMessage: "Last snapshot reloaded.",
+                });
+            } catch (error) {
+                showStatus("Failed to reload last snapshot: " + error, "error");
+            } finally {
+                setBusy("reloadSnapshotBtn", "Reload Last Snapshot", "Reloading snapshot...", false);
+                syncReloadButton();
+            }
+        }
+
+        async function selectSnapshotFile() {
+            if (!invoke) {
+                showStatus("Tauri bridge is not ready yet.", "error");
+                return;
+            }
+
+            try {
+                const snapshotPath = await invoke("select_snapshot_file");
+                if (!snapshotPath) {
+                    return;
+                }
+
+                setBusy("snapshotBtn", "Load Snapshot JSON", "Loading snapshot...", true);
+                await loadSnapshotPath(snapshotPath, {
+                    label: snapshotPath,
+                    loadingMessage: "Loading memory snapshot...",
+                    successMessage: "Snapshot loaded successfully.",
+                });
+            } catch (error) {
+                showStatus("Failed to load snapshot: " + error, "error");
+            } finally {
+                setBusy("snapshotBtn", "Load Snapshot JSON", "Loading snapshot...", false);
+                syncReloadButton();
+            }
+        }
+
+        async function loadExampleSnapshot(options = {}) {
+            if (!invoke) {
+                showStatus("Tauri bridge is not ready yet.", "error");
+                return;
+            }
+
+            const { startup = false } = options;
+
+            try {
+                setBusy("exampleBtn", "Load Example Snapshot", "Loading example...", true);
+                showStatus(
+                    startup ? "Loading bundled example snapshot for the vessel UI..." : "Loading bundled example snapshot...",
+                    "loading",
+                );
+                const snapshot = await invoke("load_example_snapshot");
+                renderSnapshot(snapshot, "Bundled example snapshot");
+                showStatus(
+                    startup ? "Bundled example snapshot loaded. Point the app at a real JSON snapshot when you're ready." : "Example snapshot loaded successfully.",
+                    "success",
+                );
+            } catch (error) {
+                showStatus("Failed to load example snapshot: " + error, "error");
+            } finally {
+                setBusy("exampleBtn", "Load Example Snapshot", "Loading example...", false);
+                syncReloadButton();
+            }
+        }
+
+        async function selectLogFile() {
+            if (!invoke) {
+                showStatus("Tauri bridge is not ready yet.", "error");
+                return;
+            }
+
+            try {
+                const logPath = await invoke("select_file");
+                if (!logPath) {
+                    return;
+                }
+
+                selectedLogPath = logPath;
+                document.getElementById("selectedLog").classList.remove("hidden");
+                document.getElementById("logPath").textContent = logPath;
+                document.getElementById("analyzeLogBtn").disabled = false;
+            } catch (error) {
+                showStatus("Failed to select process log: " + error, "error");
+            }
+        }
+
+        async function analyzeSelectedLog() {
+            if (!invoke) {
+                showStatus("Tauri bridge is not ready yet.", "error");
+                return;
+            }
+
+            if (!selectedLogPath) {
+                showStatus("Select a log file first.", "error");
+                return;
+            }
+
+            try {
+                setBusy("analyzeLogBtn", "Analyze Selected Log", "Analyzing log...", true);
+                showStatus("Analyzing legacy process log...", "loading");
+                const result = await invoke("analyze_process_log", { logPath: selectedLogPath });
+
+                if (result.success && result.report) {
+                    document.getElementById("report").textContent = result.report;
+                    document.getElementById("reportSection").classList.remove("hidden");
+                    showStatus("Legacy log analysis completed successfully.", "success");
+                } else {
+                    showStatus("Log analysis failed: " + (result.error || "Unknown error"), "error");
+                }
+            } catch (error) {
+                showStatus("Failed to analyze selected log: " + error, "error");
+            } finally {
+                setBusy("analyzeLogBtn", "Analyze Selected Log", "Analyzing log...", false);
             }
         }
     </script>
