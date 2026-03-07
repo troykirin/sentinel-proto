@@ -128,19 +128,19 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🛡️ Sentinel Proto</h1>
+            <h1>Sentinel Proto</h1>
             <p class="subtitle">Windows Process Security Analyzer</p>
         </div>
 
         <div class="controls">
             <button onclick="selectFile()" id="selectBtn" disabled>
-                📁 Select Process Log
+                Select Process Log
             </button>
             <button onclick="analyzeFile()" id="analyzeBtn" disabled>
-                🔍 Analyze Processes
+                Analyze Processes
             </button>
             <button onclick="greet()" id="testBtn" disabled>
-                👋 Test Connection
+                Test Connection
             </button>
         </div>
 
@@ -220,7 +220,7 @@
                 showStatus("Failed to analyze file: " + error, "error");
             } finally {
                 document.getElementById("analyzeBtn").disabled = false;
-                document.getElementById("analyzeBtn").innerHTML = '🔍 Analyze Processes';
+                document.getElementById("analyzeBtn").innerHTML = 'Analyze Processes';
             }
         }
 
@@ -232,9 +232,9 @@
             
             try {
                 const result = await invoke("greet", { name: "Sentinel" });
-                showStatus("✅ Connection test successful: " + result, "success");
+                showStatus("Connection test successful: " + result, "success");
             } catch (error) {
-                showStatus("❌ Connection test failed: " + error, "error");
+                showStatus("Connection test failed: " + error, "error");
             }
         }
 
