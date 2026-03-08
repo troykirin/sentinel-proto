@@ -26,10 +26,14 @@ The preferred Python workflow is now `uv`.
 From the repo root:
 
 ```bash
+uv python install 3.15
+uv python pin 3.15
 uv sync --dev
 uv run pytest
 uv run python process_analyzer.py --help
 ```
+
+The project targets Python 3.14+ and is pinned for local development to the `3.15` line through `.python-version`.
 
 If you want to run the analyzer directly against a log:
 
