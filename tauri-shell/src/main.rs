@@ -138,6 +138,7 @@ fn run_analyzer(log_path: &Path) -> Result<AnalysisResult, String> {
     }
 
     let python_commands = [
+        ("uv", vec!["run", "python"]),
         ("python", Vec::<&str>::new()),
         ("py", vec!["-3"]),
         ("python3", Vec::<&str>::new()),
@@ -186,7 +187,7 @@ fn run_analyzer(log_path: &Path) -> Result<AnalysisResult, String> {
         success: false,
         report: None,
         error: Some(format!(
-            "Failed to execute analyzer. Tried python, py -3, and python3. {}",
+            "Failed to execute analyzer. Tried uv run python, python, py -3, and python3. {}",
             execution_errors.join(" | ")
         )),
     })

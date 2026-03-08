@@ -19,6 +19,24 @@ There are two modes in this repo:
 
 The snapshot contract is documented in `contracts/memory_snapshot.schema.json`, `contracts/memory_snapshot.example.json`, and `contracts/README.md`.
 
+## Python Workflow
+
+The preferred Python workflow is now `uv`.
+
+From the repo root:
+
+```bash
+uv sync --dev
+uv run pytest
+uv run python process_analyzer.py --help
+```
+
+If you want to run the analyzer directly against a log:
+
+```bash
+uv run python process_analyzer.py <logfile>
+```
+
 ## Run The Desktop UI
 
 From the repo root:
@@ -66,25 +84,25 @@ See `contracts/README.md` for field guidance.
 Basic usage:
 
 ```bash
-python process_analyzer.py <logfile>
+uv run python process_analyzer.py <logfile>
 ```
 
 Save report to file:
 
 ```bash
-python process_analyzer.py <logfile> --output report.txt
+uv run python process_analyzer.py <logfile> --output report.txt
 ```
 
 Export JSON:
 
 ```bash
-python process_analyzer.py <logfile> --json results.json
+uv run python process_analyzer.py <logfile> --json results.json
 ```
 
 Verbose output:
 
 ```bash
-python process_analyzer.py <logfile> -v
+uv run python process_analyzer.py <logfile> -v
 ```
 
 The analyzer still checks for:

@@ -1,0 +1,20 @@
+[project]
+name = "sentinel-proto"
+version = "0.1.0"
+description = "Thin desktop vessel for process and memory snapshots, with a legacy Windows process analyzer."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "tomli>=1.2.0; python_version < '3.11'",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.0,<9",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.uv]
+package = false
